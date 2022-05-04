@@ -1,0 +1,57 @@
+# Configuration version
+config-version: 1.0.0
+
+checks:
+  punishment-command: kick %player% Automatic cheat detection
+  flight:
+    a:
+      description: Linear move in air
+      enabled: true
+      punishable: true
+      max-violations: 10
+      cancel: -1
+    b:
+      description: Glide used for bypass flight of Vulcan
+      enabled: true
+      punishable: true
+      max-violations: 10
+      cancel: -1
+  groundspoof:
+    a:
+      description: Player on ground clientside while serverside not on ground
+      enabled: true
+      punishable: true
+      max-violations: 10
+      cancel: -1
+  invalid:
+    a:
+      description: Constant motion
+      enabled: true
+      punishable: true
+      max-violations: 25
+      cancel: -1
+    b:
+      description: Invalid Y velocity on ground
+      enabled: false
+      punishable: false
+      max-violations: 25
+      cancel: -1
+    c:
+      description: Invalid X/Z velocity when jumping
+      enabled: false
+      punishable: false
+      max-violations: 25
+      cancel: -1
+    d:
+      description: Rounded motion (XYZ; Y)
+      enabled: true
+      punishable: true
+      max-violations: 15
+      cancel: -1
+  speed:
+    a:
+      description: Too long movement
+      enabled: true
+      punishable: true
+      max-violations: 20
+      cancel: -1

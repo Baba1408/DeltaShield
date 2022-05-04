@@ -1,0 +1,26 @@
+# Configuration version
+config-version: 1.0.0
+
+alerts:
+  hack: '&4&lDeltaAC &8» &f%player% &7failed &f%check% &7(&fType %type%&7) &7[&4%vl%&7/&4%max-vl%&7]'
+  chats: '&4&lDeltaShield &8» &f%player% &7failed chat "&f%arg%&7" (&fType %type%&7)'
+  commands: '&4&lDeltaShield &8» &f%player% &7failed command "&f%arg%&7" (&fType %type%&7)'
+  hack-hover:
+    - '&8» &4Description:&7 %desc%'
+    - '&8» &4Informations:&7 %infos%'
+    - ''
+    - '&7Clic to teleport'
+
+messages:
+  alerts-enabled: '&4&lDeltaAC &8» &aAlerts enabled'
+  alerts-disabled: '&4&lDeltaAC &8» &cAlerts disabled'
+  reset-violations: '&4&lDeltaAC &8» &7Violations reset for all players !'
+
+blacklist:
+  commands:
+    warn: '&4&l/&6!&4&l\&c You do not have permission to perform this command'
+    matrix: 'azertyuiopqsdfghjklm'
+  chat:
+    warn: '&4&l/&6!&4&l\&c You do not have permission to write this in the chat'
+    matrix: 'azertyuiopqsdfghjklm'
+    too-short: '&cYour message is too short, please write a longer one'

@@ -1,0 +1,50 @@
+# Configuration version
+config-version: 1.0.0
+
+# List of punishment:
+# - 1 : Warn player
+# - 2 : Black screen with matrix characters
+# - 3 : Execute command (example : kick %player%)
+blacklist:
+  commands:
+    punishment:
+      type: 2
+      alert-staff: true
+      command: 'kick %player% You do not have permission to perform this command'
+    startwith:
+      - plugins
+      - pl
+      - ver
+      - version
+      - about
+      - help
+      - '?'
+      - bukkit
+      - icanhasbukkit
+      - '/calc'
+      - '/calculate'
+      - '/eval'
+      - '/evaluate'
+      - '/solve'
+      - 'mv ^'
+      - pex
+    contains:
+      - '${'
+  chats:
+    punishment:
+      type: 1
+      alert-staff: true
+      command: 'kick %player% You do not have permission to write this in the chat'
+    # Minimum number of characters
+    # put -1 to disable
+    block-too-short: 1
+    startwith:
+      - '/'
+      - '\'
+      - '.'
+      - ':'
+      - '#'
+      - '<'
+      - '>'
+    contains:
+      - '${'

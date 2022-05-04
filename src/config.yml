@@ -1,0 +1,59 @@
+# For a full explanation of the features, go to : https://suite.deltamc.fr/
+
+# Configuration version
+config-version: 1.0.0
+
+plugin-updater:
+  send-alert-on-join: true
+  suggest-spigot-link: true
+  # Automatic download of the latest update if it is detected (Professional use)
+  auto-download:
+    enabled: false
+    # Works if automatic download is enabled and an external plugin is present to restart the plugin (Plugman)
+    # This will directly replace the DeltaShield file with the update and will not create a separate DeltaShield.update file
+    auto-restart: true
+
+# Automatic update of the configuration file to have the latest changes (recommended)
+auto-config-updater:
+  checks:
+    enabled: true
+    # Available languages: en; fr; custom
+    language: en
+    ignore-plugin-version: false
+    custom: 'https://gist.githubusercontent.com/user/**********/raw/config.yml'
+  messages:
+    enabled: true
+    # Available languages: en; fr; custom
+    language: en
+    ignore-plugin-version: true
+    custom: 'https://gist.githubusercontent.com/user/**********/raw/config.yml'
+  blacklist:
+    enabled: false
+    # Available languages: en; fr; custom
+    language: en
+    ignore-plugin-version: true
+    custom: 'https://gist.githubusercontent.com/user/**********/raw/config.yml'
+
+fixs:
+  # Preventing the player from going into a null chunk
+  null-chunk: true
+  # Sends coordinated packet to spectator to correspond with the target
+  spectator: true
+
+# Function to redirect commands (example: /gm to /gamemode with : gm#gamemode)
+redirected-commands:
+  - ds#deltashield
+  - gm#gamemode
+  - lg#ww
+
+# Allow tab completion to allow player to see all plugins on your server
+anti-tab-completion:
+  enabled: true
+  # Minimum length to allow tab completion (-1 to completely disable)
+  minimum-length: -1 # (-1 by default)
+
+# Reset player's violations
+reset-violations:
+  enabled: true
+  interval: 5 # in minutes (5 by default)
+  silent: true
