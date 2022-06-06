@@ -1,9 +1,15 @@
 package fr.baba.deltashield.commands;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -17,7 +23,10 @@ import fr.baba.deltashield.Config;
 import fr.baba.deltashield.Main;
 
 public class DeltaShield implements CommandExecutor, TabCompleter {
-	static ArrayList<String> help = new ArrayList<>();
+	static ArrayList<String> help = new ArrayList<>(Arrays.asList("Help#Display the usage menu for the plugin",
+			"Alerts#Enable/disable moderation alerts",
+			"Reload#Reload the plugin configuration",
+			"Restart#Restart the plugin completely §c(requires PlugMan)"));
 	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -74,12 +83,14 @@ public class DeltaShield implements CommandExecutor, TabCompleter {
 	}
 	
 	public static void help(CommandSender s) {
-		if(help.isEmpty()){
-			help.add("Help#Display the usage menu for the plugin");
-			help.add("Alerts#Enable/disable moderation alerts");
-			help.add("Reload#Reload the plugin configuration");
-			help.add("Restart#Restart the plugin completely §c(requires PlugMan)");
-		}
+		Main main = Main.getPlugin(Main.class);
+		
+		//if(help.isEmpty()){
+			//help.add("Help#Display the usage menu for the plugin");
+			//help.add("Alerts#Enable/disable moderation alerts");
+			//help.add("Reload#Reload the plugin configuration");
+			//help.add("Restart#Restart the plugin completely §c(requires PlugMan)");
+		//}
 		
 		String line = "§8§m-----------------------------------";
 		String msg = line + "\n";
@@ -87,8 +98,25 @@ public class DeltaShield implements CommandExecutor, TabCompleter {
 			String[] x = w.split("#");
 			msg = msg + "§6" + x[0] + "§r §8§l•§r §e" + x[1] + "§r\n";
 		}
-		msg = msg + line;
 		
+		msg = msg + line;
 		s.sendMessage(msg);
+		
+		
+		String version;
+		String ver;
+		
+		try {
+			HttpsURLConnection con = (HttpsURLConnection) new URL("https://api.spigotmc.org/legacy/update.php?resource=101756").openConnection();
+			con.setRequestMethod("GET");
+			version = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
+			ver = "§8(§6Version §7: §e%current%§7/§e%latest%§8)"
+					.replace("%current%", main.getDescription().getVersion())
+					.replace("%latest%", version);
+			s.sendMessage(ver);
+		} catch (Exception ex) {
+			s.sendMessage("§cFailed to check for updates !");
+			return;
+		}
 	}
 }

@@ -1,41 +1,75 @@
+# ╔══════════════════════╗
+# ║ DeltaShield          ║
+# ║ > Checks file        ║
+# ╚══════════════════════╝
 # Configuration version
 config-version: 1.0.0
 
+# All settings:
+#   description: Description of the violation 
+#   enabled: Enable or disable the check
+#   punishable: Enable or disable the punishment for this check
+#   max-violations: Number of max violations can make player before get punished
+#   cancel: Number of the multiple of violations for it to be cancelled               (optional)
+#   punishment-command: Command that the server must execute to apply the punishment  (optional)
+#   bypass-delay: Activate to remove the delay before executing the punishment        (optional)
+
+# Example:
+#   description: Did something wrong
+#   enabled: true
+#   punishable: true
+#   max-violations: 10
+#   punishment-command: 'kick %player% You won\'t have to do this again'
+#   bypass-delay: true
+
 checks:
-  punishment-command: kick %player% Automatic cheat detection
+  punishment-command: 'kick %player% Automatic cheat detection'
+  climb:
+    a:
+      description: Increased speed while climbing
+      enabled: true
+      punishable: true
+      max-violations: 10
   flight:
     a:
       description: Linear move in air
       enabled: true
       punishable: true
       max-violations: 10
-      cancel: -1
     b:
       description: Glide used for bypass flight of Vulcan
       enabled: true
       punishable: true
       max-violations: 10
-      cancel: -1
+    c:
+      description: Increase Y while in air
+      enabled: true
+      punishable: true
+      max-violations: 5
   groundspoof:
     a:
       description: Player on ground clientside while serverside not on ground
       enabled: true
       punishable: true
+      max-violations: 5
+      punishment-command: 'minecraft:kick %player% Connection timed out: no further information'
+  inventory:
+    a:
+      description: Clicking while moving
+      enabled: true
+      punishable: true
       max-violations: 10
-      cancel: -1
   invalid:
     a:
       description: Constant motion
       enabled: true
       punishable: true
       max-violations: 25
-      cancel: -1
     b:
       description: Invalid Y velocity on ground
       enabled: false
       punishable: false
       max-violations: 25
-      cancel: -1
     c:
       description: Invalid X/Z velocity when jumping
       enabled: false
@@ -47,11 +81,25 @@ checks:
       enabled: true
       punishable: true
       max-violations: 15
-      cancel: -1
+    e:
+      description: Invalid vertical movement
+      enabled: true
+      punishable: true
+      max-violations: 20
   speed:
     a:
       description: Too long movement
       enabled: true
       punishable: true
       max-violations: 20
-      cancel: -1
+  steal:
+    a:
+      description: Clicking too fast
+      enabled: false
+      punishable: false
+      max-violations: 20
+    b:
+      description: Same clicking duration interval
+      enabled: false
+      punishable: false
+      max-violations: 10

@@ -10,28 +10,29 @@ import org.bukkit.entity.Player;
 
 import fr.baba.deltashield.Config;
 import fr.baba.deltashield.Main;
-import fr.baba.deltashield.utils.PlayerUtil;
+import fr.baba.deltashield.utils.Alert;
+import fr.baba.deltashield.utils.sendWebhook;
 
 public class Hack {
-	static Map<UUID, Map<String, Integer>> volume = new HashMap<>();
+	static Map<UUID, Map<String, Integer>> vl = new HashMap<>();
 	static Map<UUID, Boolean> cannot = new HashMap<>();
 	
 	public static void start() {
 		Main main = Main.getPlugin(Main.class);
-		int interval = Config.getChecks().getInt("reset-violations.interval") * 1200;
+		int interval = main.getConfig().getInt("modules.checks.reset-violations.interval") * 1200;
 		
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, new Runnable() {
 			public void run() {
-				if(!volume.isEmpty()){
-					volume.clear();
-					if(!Config.getChecks().getBoolean("reset-violations.silent")) PlayerUtil.sendAlert(Config.getChecks().getString("reset-violations.message")
-							.replace("&", "§"), null);
+				if(!vl.isEmpty()){
+					vl.clear();
+					if(!main.getConfig().getBoolean("modules.checks.reset-violations.silent")) Alert.sendAlert(Config.getMessages().getString("messages.reset-violations")
+							.replace("&", "§"));
 				}
 			}
 		}, interval, interval);
 	}
 	
-	public static void Check(Player player, String check, String type, Location last){
+	public static void Check(Player player, String check, String type, String infos, Location from){
 		if(player.hasPermission("deltashield.bypass.hack")) return;
 		Main main = Main.getPlugin(Main.class);
 		Boolean punish = false;
@@ -44,19 +45,19 @@ public class Hack {
 		
 		Map<String, Integer> x = new HashMap<>();
 		
-		if(volume.get(uuid) == null){
+		if(vl.get(uuid) == null){
 			x.put(map, 1);
-			volume.put(uuid, x);
-		} else if(volume.get(uuid).get(map) != null) {
-			x = volume.get(uuid);
-			x.put(map, volume.get(uuid).get(map) + 1);
-			volume.put(uuid, x);
+			vl.put(uuid, x);
+		} else if(vl.get(uuid).get(map) != null) {
+			x = vl.get(uuid);
+			x.put(map, vl.get(uuid).get(map) + 1);
+			vl.put(uuid, x);
 			
-			if(volume.get(uuid).get(map) >= Config.getChecks().getInt(place + "max-violations")) punish = true;
+			if(vl.get(uuid).get(map) >= Config.getChecks().getInt(place + "max-violations") && Config.getChecks().getBoolean(place + ".punishable")) punish = true;
 		} else {
-			x = volume.get(uuid);
+			x = vl.get(uuid);
 			x.put(map, 1);
-			volume.put(uuid, x);
+			vl.put(uuid, x);
 		}
 		
 		String alert = Config.getMessages().getString("alerts.hack")
@@ -64,36 +65,40 @@ public class Hack {
 				.replace("%player%", player.getName())
 				.replace("%check%", check.substring(0, 1).toUpperCase() + check.substring(1))
 				.replace("%type%", type.toUpperCase())
-				.replace("%vl%", volume.get(uuid).get(map).toString())
+				.replace("%vl%", vl.get(uuid).get(map).toString())
 				.replace("%max-vl%", "" + Config.getChecks().getInt(place + "max-violations"))
 				.replace("%desc%", Config.getChecks().getString("checks." + check + "." + type + ".description"));
 		
 		String desc = "";
-		for(String s : Config.getMessages().getStringList("alerts.hack-hover")){
-			desc = desc + s + "\n";
-		}
+		for(String s : Config.getMessages().getStringList("alerts.hack-hover")) desc = desc + s + "\n";
 		
 		desc = desc.substring(0, desc.length() - 1)
 				.replace("&", "§")
 				.replace("%player%", player.getName())
 				.replace("%check%", check.substring(0, 1).toUpperCase() + check.substring(1))
 				.replace("%type%", type.toUpperCase())
-				.replace("%vl%", volume.get(uuid).get(map).toString())
+				.replace("%vl%", vl.get(uuid).get(map).toString())
 				.replace("%max-vl%", "" + Config.getChecks().getInt(place + "max-violations"))
-				.replace("%desc%", Config.getChecks().getString("checks." + check + "." + type + ".description"))
-				.replace("%infos%", "No information provided");
+				.replace("%desc%", Config.getChecks().getString("checks." + check + "." + type + ".description"));
 		
-		PlayerUtil.sendAlert(alert, desc);
+		if(infos != null && !infos.isEmpty()){
+			desc = desc.replace("%infos%", infos);
+		} else desc = desc.replace("%infos%", "No information provided");
 		
-		
-		if(Config.getChecks().getInt(place + "cancel") >= 1 && volume.get(uuid).get(map) % Config.getChecks().getInt(place + "cancel") == 0){
-			player.teleport(last);
+		if(from != null && Config.getChecks().get(place + "cancel") != null && Config.getChecks().getInt(place + "cancel") >= 1 && vl.get(uuid).get(map) % Config.getChecks().getInt(place + "cancel") == 0){
+			player.teleport(from);
 		}
 		
+		if(vl.get(uuid).get(map) % main.getConfig().getInt("modules.checks.alert-interval") == 0 || punish == true){
+			Alert.sendComponentAlert(alert, desc, "tp " + player.getName());
+			if(main.getConfig().getBoolean("webhook.hack.flagged.enabled")) sendWebhook.Flagged(player, check, type, infos, vl.get(uuid).get(map).toString());
+		}
 		
 		if(punish == true){
-			volume.remove(uuid);
 			cannot.put(uuid, true);
+			
+			int delay = 0;
+			if(!Config.getChecks().getBoolean(place + "bypass-delay")) delay = main.getConfig().getInt("modules.checks.punishment-delay") * 20;
 			
 			if(Config.getChecks().getString(place + "punishment-command") != null){
 				place = place + "punishment-command";
@@ -115,10 +120,39 @@ public class Hack {
 			
 			Bukkit.getScheduler().runTaskLater(main, new Runnable() {
 				public void run() {
-					cannot.remove(uuid);
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+					Alert.sendAlert(Config.getMessages().getString("alerts.hack-punished")
+							.replace("&", "§")
+							.replace("%player%", player.getName())
+							.replace("%check%", check.substring(0, 1).toUpperCase() + check.substring(1))
+							.replace("%type%", type.toUpperCase())
+							.replace("%vl%", vl.get(uuid).get(map).toString())
+							.replace("%max-vl%", "" + Config.getChecks().getInt("checks." + check + "." + type + ".max-violations"))
+							.replace("%desc%", Config.getChecks().getString("checks." + check + "." + type + ".description")));
+					Alert.sendHotbar(Config.getMessages().getString("alerts.hack-hotbar")
+							.replace("&", "§")
+							.replace("%player%", player.getName())
+							.replace("%check%", check.substring(0, 1).toUpperCase() + check.substring(1))
+							.replace("%type%", type.toUpperCase())
+							.replace("%vl%", vl.get(uuid).get(map).toString())
+							.replace("%max-vl%", "" + Config.getChecks().getInt("checks." + check + "." + type + ".max-violations"))
+							.replace("%desc%", Config.getChecks().getString("checks." + check + "." + type + ".description")), main.getConfig().getBoolean("modules.checks.hotbar.bypass-alerts-disabled"));
+					sendWebhook.Punished(player, check, type, infos, vl.get(uuid).get(map).toString());
+					vl.remove(uuid);
+					cannot.remove(uuid);
 				}
-			}, 60L);
+			}, delay);
 		}
+	}
+	
+	public static void setRecentPunish(UUID uuid) {
+		cannot.put(uuid, true);
+		Main main = Main.getPlugin(Main.class);
+		
+		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+			public void run() {
+				cannot.remove(uuid);
+			}
+		}, main.getConfig().getInt("modules.checks.punishment-delay") * 20);
 	}
 }

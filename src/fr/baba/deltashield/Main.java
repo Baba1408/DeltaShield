@@ -12,25 +12,35 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import fr.baba.deltashield.checks.ClimbA;
 import fr.baba.deltashield.checks.FlightA;
 import fr.baba.deltashield.checks.FlightB;
 import fr.baba.deltashield.checks.GroundSpoofA;
+import fr.baba.deltashield.checks.InventoryA;
+import fr.baba.deltashield.checks.StealA;
+import fr.baba.deltashield.checks.StealB;
 import fr.baba.deltashield.checks.InvalidA;
 import fr.baba.deltashield.checks.InvalidB;
 import fr.baba.deltashield.checks.InvalidC;
 import fr.baba.deltashield.checks.InvalidD;
+import fr.baba.deltashield.checks.InvalidE;
+import fr.baba.deltashield.checks.FlightC;
 import fr.baba.deltashield.checks.SpeedA;
 import fr.baba.deltashield.commands.DeltaShield;
 import fr.baba.deltashield.core.Hack;
+import fr.baba.deltashield.events.BlockBreak;
 import fr.baba.deltashield.events.PlayerChat;
 import fr.baba.deltashield.events.PlayerCommand;
+import fr.baba.deltashield.events.PlayerDamage;
 import fr.baba.deltashield.events.PlayerJoin;
+import fr.baba.deltashield.events.VulcanPunish;
 import fr.baba.deltashield.fixs.NullChunk;
 import fr.baba.deltashield.fixs.Spectator;
 import fr.baba.deltashield.fixs.TabCompletePacket;
+import fr.baba.deltashield.utils.Alert;
 
-public class Main extends JavaPlugin{
-	String prefix = "§2[§aDeltaShield§2]§r §a";
+public class Main extends JavaPlugin {
+	String prefix = "§2[§aDeltaShield§2] ";
 	String load = "		§3-§b ";
 	
 	List<String> bcommands = new ArrayList<>();
@@ -78,8 +88,9 @@ public class Main extends JavaPlugin{
 		getCommand("deltashield").setExecutor(new DeltaShield());
 		getCommand("deltashield").setTabCompleter(new DeltaShield());
 		
-		s.sendMessage(prefix + "Successfully loaded !");
+		s.sendMessage(prefix + "§aSuccessfully loaded !");
 		
+		Alert.sendInfo(prefix + "§bPlugin successfully restarted !");
 		Updater.Check();
 	}
 	
@@ -105,26 +116,53 @@ public class Main extends JavaPlugin{
 		s.sendMessage(load + "Loading Events...");
 		pm.registerEvents(new PlayerJoin(this), this);
 		
-		Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new PlayerCommand(this), this));
-		Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new PlayerChat(this), this));
+		if(getConfig().getBoolean("modules.blacklist.enabled")){
+			Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new PlayerCommand(this), this));
+			Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new PlayerChat(this), this));
+		}
+		
+		Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new PlayerDamage(), this));
+		if(Config.getChecks().getBoolean("anti-xray.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new BlockBreak(), this));
 		
 			//Others
 		if(getConfig().getBoolean("anti-tab-completion.enabled")) Bukkit.getScheduler().runTask(this, () -> TabCompletePacket.launch(this));
 		
 			//Fixs
-		if(getConfig().getBoolean("fixs.null-chunk")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new NullChunk(), this));
-		if(getConfig().getBoolean("fixs.spectator")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new Spectator(), this));
+		if(getConfig().getBoolean("fixs.null-chunk")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new NullChunk(), this));
+		if(getConfig().getBoolean("fixs.spectator")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new Spectator(), this));
 		
 			//Checks
-		if(Config.getChecks().getBoolean("reset-violations.enabled")) Hack.start();
-		if(Config.getChecks().getBoolean("checks.flight.a.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new FlightA(), this));
-		if(Config.getChecks().getBoolean("checks.flight.b.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new FlightB(), this));
-		if(Config.getChecks().getBoolean("checks.groundspoof.a.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new GroundSpoofA(), this));
-		if(Config.getChecks().getBoolean("checks.invalid.a.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new InvalidA(), this));
-		if(Config.getChecks().getBoolean("checks.invalid.b.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new InvalidB(), this));
-		if(Config.getChecks().getBoolean("checks.invalid.c.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new InvalidC(), this));
-		if(Config.getChecks().getBoolean("checks.invalid.d.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new InvalidD(), this));
-		if(Config.getChecks().getBoolean("checks.speed.a.enabled")) Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new SpeedA(), this));
+		if(Config.getChecks().getBoolean("modules.checks.reset-violations.enabled")) Hack.start();
+		
+		if(getConfig().getBoolean("modules.checks.hotbar.vulcan-punishment")){
+			if(pm.getPlugin("Vulcan") != null && pm.getPlugin("Vulcan").isEnabled()){
+				pm.registerEvents(new VulcanPunish(), this);
+			} else {
+				s.sendMessage("§cVulcan cannot be hooked with the plugin because it is not present on the server or is not activated!");
+			}
+		}
+		
+		//if(Config.getChecks().getBoolean("checks.autoclicker.a.enabled")){
+			//Bukkit.getScheduler().runTask(this, () -> pm.registerEvents(new AutoclickerA(), this));
+		//pm.registerEvents(new AutoclickerA(), this);
+			//AutoclickerA.launch();
+		//}
+		if(getConfig().getBoolean("modules.checks.enabled")){
+			if(Config.getChecks().getBoolean("checks.climb.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new ClimbA(), this));
+			if(Config.getChecks().getBoolean("checks.flight.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new FlightA(), this));
+			if(Config.getChecks().getBoolean("checks.flight.b.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new FlightB(), this));
+			if(Config.getChecks().getBoolean("checks.flight.c.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new FlightC(), this));
+			if(Config.getChecks().getBoolean("checks.groundspoof.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new GroundSpoofA(), this));
+			if(Config.getChecks().getBoolean("checks.inventory.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InventoryA(), this));
+			if(Config.getChecks().getBoolean("checks.invalid.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InvalidA(), this));
+			if(Config.getChecks().getBoolean("checks.invalid.b.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InvalidB(), this));
+			if(Config.getChecks().getBoolean("checks.invalid.c.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InvalidC(), this));
+			if(Config.getChecks().getBoolean("checks.invalid.d.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InvalidD(), this));
+			if(Config.getChecks().getBoolean("checks.invalid.e.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new InvalidE(), this));
+			if(Config.getChecks().getBoolean("checks.speed.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new SpeedA(), this));
+			if(Config.getChecks().getBoolean("checks.steal.a.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new StealA(), this));
+			if(Config.getChecks().getBoolean("checks.steal.b.enabled")) Bukkit.getScheduler().runTaskAsynchronously(this, () -> pm.registerEvents(new StealB(), this));
+		}
 	}
 	
 	File file = new File(getDataFolder(), "config.yml");

@@ -26,11 +26,12 @@ public class FlightA implements Listener {
 		Location from = event.getFrom();
 		Location to = event.getTo();
 		
-		if(p.getLocation().getBlock().getType() == Material.AIR && p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.AIR){
-			if(!PlayerUtil.isOnGround(p) && !p.getAllowFlight() && to.getY() >= from.getY() && to.getY() - from.getY() < 0.0001){
+		if(p.getLocation().getBlock().getType() == Material.AIR && !p.isInsideVehicle() && p.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.AIR){
+			double y = to.getY() - from.getY();
+			if(!p.getAllowFlight() && to.getY() >= from.getY() && y < 0.0001){
 				if(map.get(uuid) != null){
 					if(PlayerUtil.blocksAroundBelow(p) && PlayerUtil.blocksAround(p)){
-						Hack.Check(p, "flight", "a", event.getFrom());
+						Hack.Check(p, "flight", "a", "Ydif: " + y, event.getFrom());
 					}
 				}
 				

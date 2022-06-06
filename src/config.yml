@@ -1,3 +1,7 @@
+# ╔══════════════════════╗
+# ║ DeltaShield          ║
+# ║ > Configuration file ║
+# ╚══════════════════════╝
 # For a full explanation of the features, go to : https://suite.deltamc.fr/
 
 # Configuration version
@@ -10,8 +14,8 @@ plugin-updater:
   auto-download:
     enabled: false
     # Works if automatic download is enabled and an external plugin is present to restart the plugin (Plugman)
-    # This will directly replace the DeltaShield file with the update and will not create a separate DeltaShield.update file
-    auto-restart: true
+    # This will directly replace the DeltaShield.jar file with the update and will not create a separate DeltaShield.update file
+    auto-restart: false
 
 # Automatic update of the configuration file to have the latest changes (recommended)
 auto-config-updater:
@@ -34,9 +38,32 @@ auto-config-updater:
     ignore-plugin-version: true
     custom: 'https://gist.githubusercontent.com/user/**********/raw/config.yml'
 
+modules:
+  checks:
+    enabled: true
+    # Reset player's violations
+    reset-violations:
+      enabled: true
+      interval: 5 # in minutes (5 by default)
+      silent: true
+    # Interval between each alert, e.g. 2 means that there will be an alert only at the sludge of 2 same violations
+    alert-interval: 2
+    # Delay before the punishment when maximum violations are reached
+    punishment-delay: 5 # in seconds
+    # Hotbar punished message (Only compatible in 1.8.8 for the moment)
+    hotbar:
+      enabled: false
+      bypass-alerts-disabled: true
+      vulcan-punishment: false
+  blacklist:
+    enabled: true
+
 fixs:
-  # Preventing the player from going into a null chunk
-  null-chunk: true
+  # Prevent the player from going into an unloaded or corrupted chunk
+  null-chunk:
+    enabled: true
+    tell-player: false
+    alert-admins: true
   # Sends coordinated packet to spectator to correspond with the target
   spectator: true
 
@@ -52,8 +79,30 @@ anti-tab-completion:
   # Minimum length to allow tab completion (-1 to completely disable)
   minimum-length: -1 # (-1 by default)
 
-# Reset player's violations
-reset-violations:
-  enabled: true
-  interval: 5 # in minutes (5 by default)
-  silent: true
+# Discord Webhook Integration
+webhook:
+  hack:
+    flagged:
+      enabled: false
+      url: 'https://discord.com/api/webhooks/****/****'
+    punished:
+      enabled: false
+      url: 'https://discord.com/api/webhooks/****/****'
+  blacklist:
+    commands:
+      enabled: false
+      url: 'https://discord.com/api/webhooks/****/****'
+    chats:
+      enabled: false
+      url: 'https://discord.com/api/webhooks/****/****'
+
+# Xray detection (Approximation)
+# The Anti-Xray doesn't do like Orebfuscator to completely make the Xray not work anymore,
+# but it averages the mined blocks to deduce if a player is using a Xray or not.
+anti-xray:
+  enabled: false
+  percentages:
+    emerald: 1
+    diamond: 1
+    gold: 3
+    iron: 5

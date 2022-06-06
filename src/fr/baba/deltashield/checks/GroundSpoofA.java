@@ -28,15 +28,13 @@ public class GroundSpoofA implements Listener {
 		double diff = to.toVector().distance(from.toVector());
 		
 		if(p.isOnGround() && diff > 0.0 && !PlayerUtil.isOnGround(p) && PlayerUtil.getDistanceToGround(p) >= 2 && to.getY() < from.getY()){
-			if(vl.get(uuid) != null && vl.get(uuid) >= 3){
-				Hack.Check(p, "groundspoof", "a", e.getFrom());
-			}
+			if(vl.get(uuid) != null && vl.get(uuid) >= 3) Hack.Check(p, "groundspoof", "a", null, e.getFrom());
 			
 			if(vl.get(uuid) == null){
 				vl.put(uuid, 1);
 			} else vl.put(uuid, vl.get(uuid) + 1);
 		} else if(vl.get(uuid) != null){
-			if(vl.get(uuid) >= 3 && p.getLocation().getBlock().getType() == Material.AIR) p.damage(5);
+			if(vl.get(uuid) >= 3 && p.getLocation().getBlock().getType() == Material.AIR) p.damage(2);
 			vl.remove(uuid);
 		}
 	}

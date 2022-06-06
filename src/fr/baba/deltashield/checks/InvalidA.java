@@ -26,13 +26,13 @@ public class InvalidA implements Listener {
 		
 		if(ldist.get(uuid) != null){
 			if(ldist.get(uuid) == dist){
-				if(p.getGameMode() != GameMode.SPECTATOR){
-					Hack.Check(event.getPlayer(), "invalid", "a", event.getFrom());
+				if(!p.getAllowFlight() && p.getGameMode() != GameMode.SPECTATOR && !p.isInsideVehicle()){
+					Hack.Check(event.getPlayer(), "invalid", "a", "Dist: " + dist, event.getFrom());
 				}
 			}
 		}
 		
-		if(p.getLocation().getBlock().getType() == Material.AIR){
+		if(p.getLocation().getBlock().getType() == Material.AIR && dist != 0.06272000215528806 && dist != 0.03136000107764403){
 			if(p.isOnGround()){
 				if(dist >= 0.29) ldist.put(uuid, dist);
 			} else if(dist != 0) ldist.put(uuid, dist);

@@ -13,8 +13,10 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 
+import fr.baba.deltashield.utils.Alert;
+
 public class Updater {
-	static String prefix = "§2[§aDeltaShield§a] ";
+	static String prefix = "§2[§aDeltaShield§2] ";
 
 	public static void Check() {
 		Main main = Main.getPlugin(Main.class);
@@ -39,17 +41,19 @@ public class Updater {
 			    
 			    if (P[0] < S[0]){
 			    	x = true;
-			    } else if ((P[1] < S[1])){
+			    } else if(P[1] < S[1]){
 			    	x = true;
 			    } else x = P[2] < S[2];
 			    
 			    if(x){
-			    	main.getLogger().info("The plugin is not up to date, a new version of the plugin is available on Spigot!"
-			    			+ "(Current : " + main.getDescription().getVersion() + " / Latest : " + version + ")");
+			    	if(main.getConfig().getBoolean("plugin-updater.send-alert-on-join")){
+			    		main.getLogger().info("The plugin is not up to date, a new version of the plugin is available on Spigot!"
+				    			+ "(Current : " + main.getDescription().getVersion() + " / Latest : " + version + ")");
 
-			    	main.setUpdateMSG(prefix + "§eAn §6update§e of the plugin is §6available§e!");
+				    	main.setUpdateMSG(prefix + "§eAn §6update§e of the plugin is §6available§e!");
+			    	}
 			    	
-			    	if(main.getConfig().getBoolean("plugin-updater.auto-download")) Download();
+			    	if(main.getConfig().getBoolean("plugin-updater.auto-download.enabled")) Download();
 			    } else main.getLogger().info("The plugin is currently updated!");
 			}
 		});
@@ -61,10 +65,11 @@ public class Updater {
 	
 	public static void Download() {
 		Main main = Main.getPlugin(Main.class);
-		File file = new File("plugins/DeltaShield.update");
+		//File file = new File("plugins/DeltaShield.update");
 		URL url = null;
 		
 		main.getLogger().info("Automatic download activated, download of the update...");
+		Alert.sendInfo(prefix + "§bDownloading update...");
 		
 		try {
 			url = new URL("https://api.spiget.org/v2/resources/101756/download");
@@ -77,15 +82,31 @@ public class Updater {
 		
 		main.getLogger().info("Installation...");
 		
-		try {
-			FileUtils.copyURLToFile(url, file);
-		} catch (IOException e) {
-			main.getLogger().info("Error while saving plugin file !\nError :\n");
-			e.printStackTrace();
-			return;
+		if(main.getConfig().getBoolean("plugin-updater.auto-download.auto-restart")){
+			if(Bukkit.getPluginManager().getPlugin("PlugMan") != null){
+				if(Bukkit.getPluginManager().getPlugin("PlugMan").isEnabled()){
+					try {
+						FileUtils.copyURLToFile(url, new File("plugins/DeltaShield.jar"));
+					} catch (IOException e) {
+						main.getLogger().info("Error while saving plugin file !\nError :\n");
+						e.printStackTrace();
+					}
+					
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload DeltaShield");
+				} else {
+					try {
+						FileUtils.copyURLToFile(url, new File("plugins/DeltaShield.update"));
+					} catch (IOException e) {
+						main.getLogger().info("Error while saving plugin file !\nError :\n");
+						e.printStackTrace();
+					}
+					
+					String msg = prefix + "§eAn update §6has been downloaded§e, an administrator must be present to delete the plugin file and rename the §6.update file to §e.jar and §6perform a plugin/server restart§e.";
+					main.getLogger().info("An update has been downloaded, an administrator must be present to delete the plugin file and rename the .update file to .jar and perform a plugin/server restart.");
+					main.setUpdateMSG(msg);
+					Alert.sendInfo(msg);
+				}
+			}
 		}
-		
-		main.getLogger().info("The plugin has been updated, but requires a server restart or a plugin restart, an administrator must be present to perform this action.");
-		main.setUpdateMSG(prefix + "§eAn update §6has been downloaded§e, an administrator must be present to perform a §6reboot of plugin/server§e.");
 	}
 }

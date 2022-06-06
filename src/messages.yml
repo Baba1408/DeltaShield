@@ -1,10 +1,20 @@
+# ╔══════════════════════╗
+# ║ DeltaShield          ║
+# ║ > Messages file      ║
+# ╚══════════════════════╝
 # Configuration version
 config-version: 1.0.0
 
 alerts:
   hack: '&4&lDeltaAC &8» &f%player% &7failed &f%check% &7(&fType %type%&7) &7[&4%vl%&7/&4%max-vl%&7]'
+  hack-punished: '&4&lDeltaAC &8» &f%player% &7has been punished for &f%check%'
+  hack-webhook-desc: '**%player%** failed **%check%** (Type **%type%**) [%vl%/%max-vl%]'
+  hack-hotbar: '&4&lConsole &8» &f%player% &7has been punished for &f%check%'
+  hack-vulcan-hotbar: '&4&lConsole &8» &f%player% &7has been punished for &f%check%'
   chats: '&4&lDeltaShield &8» &f%player% &7failed chat "&f%arg%&7" (&fType %type%&7)'
   commands: '&4&lDeltaShield &8» &f%player% &7failed command "&f%arg%&7" (&fType %type%&7)'
+  blacklist: '&4&lDeltaShield &8» &f%player% &7failed %check% "&f%arg%&7" (&fType %type%&7)'
+  blacklist-webhook-desc: '**%player%** failed **%check%** "%arg%" (Type **%type%**)'
   hack-hover:
     - '&8» &4Description:&7 %desc%'
     - '&8» &4Informations:&7 %infos%'
@@ -20,7 +30,7 @@ blacklist:
   commands:
     warn: '&4&l/&6!&4&l\&c You do not have permission to perform this command'
     matrix: 'azertyuiopqsdfghjklm'
-  chat:
+  chats:
     warn: '&4&l/&6!&4&l\&c You do not have permission to write this in the chat'
     matrix: 'azertyuiopqsdfghjklm'
     too-short: '&cYour message is too short, please write a longer one'

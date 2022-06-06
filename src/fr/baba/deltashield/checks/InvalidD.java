@@ -18,7 +18,7 @@ public class InvalidD implements Listener {
 		
 		//XYZ
 		if(from.distance(to) != 0 && from.distance(to) == Math.round(from.distance(to))){
-			Hack.Check(p, "invalid", "d", from);
+			Hack.Check(p, "invalid", "d", "XYZ | Dist: " + from.distance(to), from);
 		}
 		
 		//Y
@@ -29,7 +29,7 @@ public class InvalidD implements Listener {
 			y = to.getY() - from.getY();
 		}
 		
-		if(y != null && y == Math.round(y)) Hack.Check(p, "invalid", "d", from);
+		if(y != null && !p.isInsideVehicle() && y == Math.round(y)) Hack.Check(p, "invalid", "d", "Y | Dist: " + from.distance(to) + " | DistY: " + y, from);
 		
 		//XZ
 		//from.setY(0);

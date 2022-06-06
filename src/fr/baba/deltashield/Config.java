@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,9 +62,9 @@ public class Config {
 	}
 	
 	public static void setupChecks() {
-		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
-		checksfile = new File(main.getDataFolder(), "checks.yml");
 		String config = "checks";
+		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
+		checksfile = new File(main.getDataFolder(), config + ".yml");
 		
 		if(main.getConfig().get("auto-config-updater." + config + ".enabled") != null && main.getConfig().getBoolean("auto-config-updater." + config + ".enabled")){
 			URL url = null;
@@ -85,53 +86,55 @@ public class Config {
 				} catch (IOException e) {
 					e.printStackTrace();
 					s.sendMessage("§cError while download config file !");
-					main.saveResource("checks.yml", false);
+					main.saveResource(config + ".yml", false);
 				}
 				//}
 		} else if(!checksfile.exists()){
-			main.saveResource("checks.yml", false);
-		} else {
-			checkscfg = YamlConfiguration.loadConfiguration(checksfile);
+			main.saveResource(config + ".yml", false);
+		}// else {
+		
+		checkscfg = YamlConfiguration.loadConfiguration(checksfile);
 			
-			@SuppressWarnings("deprecation")
-			FileConfiguration checksdefault = YamlConfiguration.loadConfiguration(main.getResource("checks.yml"));
+		@SuppressWarnings("deprecation")
+		FileConfiguration checksdefault = YamlConfiguration.loadConfiguration(main.getResource("checks.yml"));
 			
-			Map<String, String> c = new HashMap<>();
-			c.put("flight", "a; b");
-			c.put("groundspoof", "a");
-			c.put("invalid", "a; b; c; d");
-			c.put("speed", "a");
+		Map<String, String> c = new HashMap<>();
+		c.put("climb", "a");
+		c.put("flight", "a; b; c");
+		c.put("groundspoof", "a");
+		c.put("inventory", "a");
+		c.put("invalid", "a; b; c; d; e");
+		c.put("speed", "a");
 			
-			ArrayList<String> d = new ArrayList<>();
-			d.add("description");
-			d.add("enabled");
-			d.add("punishable");
-			d.add("max-violations");
+		ArrayList<String> d = new ArrayList<>(Arrays.asList("description",
+				"enabled",
+				"punishable",
+				"max-violations"));
 			
-			Boolean save = false;
+		Boolean save = false;
 			
-			for(String w : c.keySet()){
-				for(String v : c.get(w).split("; ")){
-					String p = "checks." + w + "." + v + ".";
-					if(getChecks().get(p + "enabled") == null){
-						for(String de : d){
-							getChecks().set(p + de, checksdefault.get(p + de));
-							if(!save) save = true;
-						}
+		for(String w : c.keySet()){
+			for(String v : c.get(w).split("; ")){
+				String p = "checks." + w + "." + v + ".";
+				if(getChecks().get(p + "enabled") == null){
+					for(String de : d){
+						getChecks().set(p + de, checksdefault.get(p + de));
+						if(!save) save = true;
 					}
 				}
 			}
-			
-			if(save) saveChecks();
 		}
+			
+		if(save) saveChecks();
+		//}
 		
 		checkscfg = YamlConfiguration.loadConfiguration(checksfile);
 	}
 	
 	public static void setupMessages() {
-		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
-		messagesfile = new File(main.getDataFolder(), "messages.yml");
 		String config = "messages";
+		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
+		messagesfile = new File(main.getDataFolder(), config + ".yml");
 		
 		if(main.getConfig().get("auto-config-updater." + config + ".enabled") != null && main.getConfig().getBoolean("auto-config-updater." + config + ".enabled")){
 			URL url = null;
@@ -153,20 +156,20 @@ public class Config {
 				} catch (IOException e) {
 					e.printStackTrace();
 					s.sendMessage("§cError while download config file !");
-					main.saveResource("messages.yml", false);
+					main.saveResource(config + ".yml", false);
 				}
 				//}
 		} else if(!messagesfile.exists()){
-			main.saveResource("messages.yml", false);
+			main.saveResource(config + ".yml", false);
 		}
 		
 		messagescfg = YamlConfiguration.loadConfiguration(messagesfile);
 	}
 	
 	public static void setupBlacklist() {
-		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
-		blacklistfile = new File(main.getDataFolder(), "blacklist.yml");
 		String config = "blacklist";
+		ConsoleCommandSender s = Bukkit.getServer().getConsoleSender();
+		blacklistfile = new File(main.getDataFolder(), config + ".yml");
 		
 		if(main.getConfig().get("auto-config-updater." + config + ".enabled") != null && main.getConfig().getBoolean("auto-config-updater." + config + ".enabled")){
 			URL url = null;
@@ -188,11 +191,11 @@ public class Config {
 				} catch (IOException e) {
 					e.printStackTrace();
 					s.sendMessage("§cError while download config file !");
-					main.saveResource("blacklist.yml", false);
+					main.saveResource(config + ".yml", false);
 				}
 				//}
 		} else if(!blacklistfile.exists()){
-			main.saveResource("blacklist.yml", false);
+			main.saveResource(config + ".yml", false);
 		}
 		
 		blacklistcfg = YamlConfiguration.loadConfiguration(blacklistfile);
